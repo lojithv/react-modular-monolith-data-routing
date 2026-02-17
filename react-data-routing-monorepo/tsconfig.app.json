@@ -32,5 +32,6 @@
       "@shared/*": ["shared/*"]
     }
   },
-  "include": ["root", "modules", "shared"]
+  "include": ["root", "modules", "shared"],
+  "exclude": ["modules/_template"]
 }
