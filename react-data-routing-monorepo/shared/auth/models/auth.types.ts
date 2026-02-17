@@ -7,10 +7,8 @@ export interface AuthUser {
   role: UserRole;
 }
 
-export interface AuthContextValue {
+/** Immutable snapshot returned by AuthStore.getSnapshot() */
+export interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
-  login: (user: AuthUser) => void;
-  logout: () => void;
-  hasRole: (roles: UserRole | UserRole[]) => boolean;
 }
