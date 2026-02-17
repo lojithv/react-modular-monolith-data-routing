@@ -16,7 +16,9 @@
     "test:products": "vitest --project products",
     "test:users": "vitest --project users",
     "test:settings": "vitest --project settings",
-    "test:shared": "vitest --project shared"
+    "test:shared": "vitest --project shared",
+    "audit:arch": "node scripts/audit.mjs",
+    "audit:arch:strict": "node scripts/audit.mjs --strict"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
