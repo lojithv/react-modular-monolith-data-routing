@@ -15,9 +15,13 @@ export default defineConfig({
     },
   },
   test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./shared/auth/__testing__/setup.ts'],
-    include: ['**/__tests__/**/*.test.{ts,tsx}'],
+    projects: [
+      'modules/auth/vitest.config.ts',
+      'modules/dashboard/vitest.config.ts',
+      'modules/products/vitest.config.ts',
+      'modules/users/vitest.config.ts',
+      'modules/settings/vitest.config.ts',
+      'shared/vitest.config.ts',
+    ],
   },
 })
