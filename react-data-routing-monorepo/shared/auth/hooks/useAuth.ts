@@ -1,11 +1,14 @@
 import { useSyncExternalStore } from 'react';
 import { authStore } from '../services/auth.service.ts';
-import type { AuthState, AuthUser, UserRole } from '../models/auth.types.ts';
+import type { AuthState, AuthUser, UserRole, PlanTier, FeatureFlag } from '../models/auth.types.ts';
 
 interface UseAuthReturn extends AuthState {
   login: (user: AuthUser) => void;
   logout: () => void;
   hasRole: (roles: UserRole | UserRole[]) => boolean;
+  hasFeature: (flags: FeatureFlag | FeatureFlag[]) => boolean;
+  hasPlan: (minPlan: PlanTier) => boolean;
+  isTrialActive: () => boolean;
 }
 
 /**
@@ -24,5 +27,8 @@ export function useAuth(): UseAuthReturn {
     login: authStore.login,
     logout: authStore.logout,
     hasRole: authStore.hasRole,
+    hasFeature: authStore.hasFeature,
+    hasPlan: authStore.hasPlan,
+    isTrialActive: authStore.isTrialActive,
   };
 }

@@ -1,5 +1,6 @@
 // Models
-export type { UserRole, AuthUser, AuthState } from './models/auth.types.ts';
+export type { UserRole, AuthUser, AuthState, PlanTier, FeatureFlag, Subscription } from './models/auth.types.ts';
+export { PLAN_HIERARCHY } from './models/auth.types.ts';
 
 // Store (framework-agnostic singleton)
 export { authStore } from './services/auth.service.ts';
@@ -10,3 +11,6 @@ export { useAuth } from './hooks/useAuth.ts';
 // Guards
 export { default as AuthGuard } from './guards/AuthGuard.tsx';
 export { default as RoleGuard } from './guards/RoleGuard.tsx';
+export { default as FeatureGuard } from './guards/FeatureGuard.tsx';
+export { default as SubscriptionGuard } from './guards/SubscriptionGuard.tsx';
+export { default as TrialGuard } from './guards/TrialGuard.tsx';

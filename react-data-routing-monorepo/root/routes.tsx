@@ -2,7 +2,15 @@ import { createBrowserRouter } from 'react-router';
 import RootLayout from '../shared/layouts/RootLayout.tsx';
 import NotFound from '../shared/components/NotFound.tsx';
 import ErrorBoundary from '../shared/components/ErrorBoundary.tsx';
-import { RoleGuard, type UserRole } from '../shared/auth/index.ts';
+import {
+  RoleGuard,
+  FeatureGuard,
+  SubscriptionGuard,
+  TrialGuard,
+  type UserRole,
+  type PlanTier,
+  type FeatureFlag,
+} from '../shared/auth/index.ts';
 
 import authRoutes from '../modules/auth/routes.ts';
 import dashboardRoutes from '../modules/dashboard/routes.ts';
@@ -10,13 +18,23 @@ import productRoutes from '../modules/products/routes.ts';
 import userRoutes from '../modules/users/routes.ts';
 import settingsRoutes from '../modules/settings/routes.ts';
 
-/**
- * Helper — wraps children in a role-guarded layout route.
- * Unauthenticated users are redirected to /auth/login.
- * Authenticated users without the required role see a 403 page.
- */
+// ─── Guard Helpers ──────────────────────────────────────
+// Wrap module routes with pathless layout routes that enforce access rules.
+
 function withRoles(roles: UserRole[]) {
   return { element: <RoleGuard roles={roles} /> };
+}
+
+function withFeatures(features: FeatureFlag[]) {
+  return { element: <FeatureGuard features={features} /> };
+}
+
+function withPlan(minPlan: PlanTier) {
+  return { element: <SubscriptionGuard minPlan={minPlan} /> };
+}
+
+function withTrial() {
+  return { element: <TrialGuard /> };
 }
 
 /**
@@ -34,19 +52,38 @@ const router = createBrowserRouter([
     Component: RootLayout,
     ErrorBoundary,
     children: [
-      // ─── Dashboard (all authenticated roles) ──────────
-      { ...withRoles(['admin', 'editor', 'viewer']), children: [dashboardRoutes] },
+      // ─── Dashboard (all roles, free tier OK) ──────────
+      {
+        ...withRoles(['admin', 'editor', 'viewer']),
+        children: [dashboardRoutes],
+      },
 
-      // ─── Products (admin + editor) ────────────────────
-      { ...withRoles(['admin', 'editor']), children: [productRoutes] },
+      // ─── Products (admin + editor, requires starter+) ─
+      {
+        ...withRoles(['admin', 'editor']),
+        children: [
+          {
+            ...withPlan('starter'),
+            children: [productRoutes],
+          },
+        ],
+      },
 
-      // ─── Users (admin only) ───────────────────────────
-      { ...withRoles(['admin']), children: [userRoutes] },
+      // ─── Users (admin only, requires pro+) ────────────
+      {
+        ...withRoles(['admin']),
+        children: [
+          {
+            ...withPlan('pro'),
+            children: [userRoutes],
+          },
+        ],
+      },
 
       // ─── Settings (admin + editor) ────────────────────
       { ...withRoles(['admin', 'editor']), children: [settingsRoutes] },
 
-      // ─── UI Showcase (dev only) ─────────────────────
+      // ─── UI Showcase (dev only) ───────────────────────
       { path: 'ui', lazy: () => import('../shared/ui/pages/UIShowcase.tsx') },
 
       // ─── Home (default redirect) ──────────────────────
@@ -59,3 +96,6 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
+
+// Re-export helpers so modules can use them in their own routes.ts if needed
+export { withRoles, withFeatures, withPlan, withTrial };

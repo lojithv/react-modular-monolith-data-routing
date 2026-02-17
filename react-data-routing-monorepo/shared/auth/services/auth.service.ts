@@ -1,4 +1,5 @@
-import type { AuthUser, AuthState, UserRole } from '../models/auth.types.ts';
+import type { AuthUser, AuthState, UserRole, PlanTier, FeatureFlag } from '../models/auth.types.ts';
+import { PLAN_HIERARCHY } from '../models/auth.types.ts';
 
 /** Sample user — swap with real auth service in production */
 const MOCK_USER: AuthUser = {
@@ -6,6 +7,11 @@ const MOCK_USER: AuthUser = {
   name: 'Alice Johnson',
   email: 'alice@example.com',
   role: 'admin',
+  subscription: {
+    plan: 'pro',
+    trialEndsAt: null,
+  },
+  features: ['analytics', 'bulk-export', 'api-access'],
 };
 
 function buildSnapshot(user: AuthUser | null): AuthState {
@@ -28,24 +34,28 @@ class AuthStore {
   constructor(initialUser: AuthUser | null = MOCK_USER) {
     this.snapshot = buildSnapshot(initialUser);
 
-    // Bind public methods so they can be passed as callbacks
     this.subscribe = this.subscribe.bind(this);
     this.getSnapshot = this.getSnapshot.bind(this);
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
     this.hasRole = this.hasRole.bind(this);
+    this.hasFeature = this.hasFeature.bind(this);
+    this.hasPlan = this.hasPlan.bind(this);
+    this.isTrialActive = this.isTrialActive.bind(this);
   }
 
-  /** Subscribe to state changes (useSyncExternalStore contract) */
+  // ─── External Store Contract ────────────────────────────
+
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
 
-  /** Return the current immutable state snapshot */
   getSnapshot(): AuthState {
     return this.snapshot;
   }
+
+  // ─── Auth Actions ───────────────────────────────────────
 
   login(user: AuthUser): void {
     this.snapshot = buildSnapshot(user);
@@ -57,12 +67,45 @@ class AuthStore {
     this.emit();
   }
 
+  // ─── Role Checks ────────────────────────────────────────
+
   hasRole(roles: UserRole | UserRole[]): boolean {
     const { user } = this.snapshot;
     if (!user) return false;
     const allowed = Array.isArray(roles) ? roles : [roles];
     return allowed.includes(user.role);
   }
+
+  // ─── Feature Flag Checks ────────────────────────────────
+
+  hasFeature(flags: FeatureFlag | FeatureFlag[]): boolean {
+    const { user } = this.snapshot;
+    if (!user) return false;
+    const required = Array.isArray(flags) ? flags : [flags];
+    return required.every((f) => user.features.includes(f));
+  }
+
+  // ─── Subscription / Plan Checks ─────────────────────────
+
+  /** Returns true if the user's plan is at least `minPlan` */
+  hasPlan(minPlan: PlanTier): boolean {
+    const { user } = this.snapshot;
+    if (!user) return false;
+    const userTier = PLAN_HIERARCHY.indexOf(user.subscription.plan);
+    const requiredTier = PLAN_HIERARCHY.indexOf(minPlan);
+    return userTier >= requiredTier;
+  }
+
+  /** Returns true if the user has an active (non-expired) trial */
+  isTrialActive(): boolean {
+    const { user } = this.snapshot;
+    if (!user) return false;
+    const { trialEndsAt } = user.subscription;
+    if (!trialEndsAt) return false;
+    return new Date(trialEndsAt) > new Date();
+  }
+
+  // ─── Internal ───────────────────────────────────────────
 
   private emit(): void {
     this.listeners.forEach((listener) => listener());
