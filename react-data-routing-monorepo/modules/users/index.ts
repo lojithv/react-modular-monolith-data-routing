@@ -6,6 +6,7 @@ export const usersModule: ModuleManifest = {
   routes: userRoutes,
   sidebar: [{ to: '/users', label: 'Users', roles: ['admin'] }],
   allowedRoles: ['admin'],
+  minPlan: 'pro',
 };
 
 export { userRoutes };

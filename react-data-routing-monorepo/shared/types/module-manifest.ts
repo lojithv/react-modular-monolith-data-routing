@@ -1,5 +1,5 @@
 import type { RouteObject } from 'react-router';
-import type { UserRole } from '@shared/auth/index.ts';
+import type { UserRole, PlanTier } from '@shared/auth/index.ts';
 
 export interface SidebarItem {
   to: string;
@@ -24,4 +24,8 @@ export interface ModuleManifest {
   sidebar?: SidebarItem[];
   /** Roles that may access this module (empty = public) */
   allowedRoles?: UserRole[];
+  /** Minimum subscription plan required to access this module */
+  minPlan?: PlanTier;
+  /** Whether this module is public (no auth required, e.g. auth module) */
+  public?: boolean;
 }

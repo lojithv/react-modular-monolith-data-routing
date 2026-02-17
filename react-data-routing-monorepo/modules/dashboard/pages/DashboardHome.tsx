@@ -1,13 +1,26 @@
-import { Link } from 'react-router';
+import { Link, useLoaderData } from 'react-router';
 
-const stats = [
-  { label: 'Total Revenue', value: '$45,231', change: '+20.1%', color: 'text-green-600' },
-  { label: 'Active Users', value: '2,350', change: '+15.3%', color: 'text-green-600' },
-  { label: 'Products', value: '128', change: '+4.5%', color: 'text-green-600' },
-  { label: 'Pending Orders', value: '23', change: '-2.1%', color: 'text-red-500' },
-];
+interface DashboardStat {
+  label: string;
+  value: string;
+  change: string;
+  positive: boolean;
+}
+
+/** Route loader — replace with real API call in production */
+export async function loader() {
+  const stats: DashboardStat[] = [
+    { label: 'Total Revenue', value: '$45,231', change: '+20.1%', positive: true },
+    { label: 'Active Users', value: '2,350', change: '+15.3%', positive: true },
+    { label: 'Products', value: '128', change: '+4.5%', positive: true },
+    { label: 'Pending Orders', value: '23', change: '-2.1%', positive: false },
+  ];
+  return { stats };
+}
 
 export function Component() {
+  const { stats } = useLoaderData<typeof loader>();
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -15,7 +28,9 @@ export function Component() {
           <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-5">
             <p className="text-sm text-gray-500">{stat.label}</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-            <p className={`text-sm mt-1 ${stat.color}`}>{stat.change} from last month</p>
+            <p className={`text-sm mt-1 ${stat.positive ? 'text-green-600' : 'text-red-500'}`}>
+              {stat.change} from last month
+            </p>
           </div>
         ))}
       </div>

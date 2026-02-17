@@ -1,14 +1,28 @@
-import { Link } from 'react-router';
+import { Link, useLoaderData } from 'react-router';
 
-const users = [
-  { id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin', status: 'Active' },
-  { id: '2', name: 'Bob Smith', email: 'bob@example.com', role: 'Editor', status: 'Active' },
-  { id: '3', name: 'Charlie Davis', email: 'charlie@example.com', role: 'Viewer', status: 'Inactive' },
-  { id: '4', name: 'Diana Lee', email: 'diana@example.com', role: 'Editor', status: 'Active' },
-  { id: '5', name: 'Ethan Brown', email: 'ethan@example.com', role: 'Admin', status: 'Active' },
-];
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: 'Active' | 'Inactive';
+}
+
+/** Route loader — replace with real API call in production */
+export async function loader() {
+  const users: User[] = [
+    { id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin', status: 'Active' },
+    { id: '2', name: 'Bob Smith', email: 'bob@example.com', role: 'Editor', status: 'Active' },
+    { id: '3', name: 'Charlie Davis', email: 'charlie@example.com', role: 'Viewer', status: 'Inactive' },
+    { id: '4', name: 'Diana Lee', email: 'diana@example.com', role: 'Editor', status: 'Active' },
+    { id: '5', name: 'Ethan Brown', email: 'ethan@example.com', role: 'Admin', status: 'Active' },
+  ];
+  return { users };
+}
 
 export function Component() {
+  const { users } = useLoaderData<typeof loader>();
+
   return (
     <div className="bg-white rounded-xl border border-gray-200">
       <div className="p-6 border-b border-gray-200">

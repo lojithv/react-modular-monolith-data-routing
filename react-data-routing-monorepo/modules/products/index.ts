@@ -6,6 +6,7 @@ export const productsModule: ModuleManifest = {
   routes: productRoutes,
   sidebar: [{ to: '/products', label: 'Products', roles: ['admin', 'editor'] }],
   allowedRoles: ['admin', 'editor'],
+  minPlan: 'starter',
 };
 
 export { productRoutes };

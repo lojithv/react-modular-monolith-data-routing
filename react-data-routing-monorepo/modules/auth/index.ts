@@ -4,7 +4,7 @@ import authRoutes from './routes.ts';
 export const authModule: ModuleManifest = {
   name: 'auth',
   routes: authRoutes,
-  allowedRoles: [], // public module
+  public: true,
 };
 
 export { authRoutes };

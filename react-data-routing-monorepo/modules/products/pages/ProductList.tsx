@@ -1,14 +1,28 @@
-import { Link } from 'react-router';
+import { Link, useLoaderData } from 'react-router';
 
-const products = [
-  { id: '1', name: 'Wireless Headphones', price: '$79.99', category: 'Electronics', stock: 142 },
-  { id: '2', name: 'Ergonomic Keyboard', price: '$129.99', category: 'Electronics', stock: 85 },
-  { id: '3', name: 'Standing Desk', price: '$449.99', category: 'Furniture', stock: 23 },
-  { id: '4', name: 'LED Monitor 27"', price: '$349.99', category: 'Electronics', stock: 67 },
-  { id: '5', name: 'Office Chair', price: '$299.99', category: 'Furniture', stock: 31 },
-];
+interface Product {
+  id: string;
+  name: string;
+  price: string;
+  category: string;
+  stock: number;
+}
+
+/** Route loader — replace with real API call in production */
+export async function loader() {
+  const products: Product[] = [
+    { id: '1', name: 'Wireless Headphones', price: '$79.99', category: 'Electronics', stock: 142 },
+    { id: '2', name: 'Ergonomic Keyboard', price: '$129.99', category: 'Electronics', stock: 85 },
+    { id: '3', name: 'Standing Desk', price: '$449.99', category: 'Furniture', stock: 23 },
+    { id: '4', name: 'LED Monitor 27"', price: '$349.99', category: 'Electronics', stock: 67 },
+    { id: '5', name: 'Office Chair', price: '$299.99', category: 'Furniture', stock: 31 },
+  ];
+  return { products };
+}
 
 export function Component() {
+  const { products } = useLoaderData<typeof loader>();
+
   return (
     <div className="bg-white rounded-xl border border-gray-200">
       <div className="p-6 border-b border-gray-200 flex items-center justify-between">
