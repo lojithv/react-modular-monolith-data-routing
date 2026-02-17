@@ -1,21 +1,11 @@
 import { Link, useLoaderData } from 'react-router';
+import type { DashboardStat } from '../types.ts';
+import { dashboardService } from '../services/dashboard.service.ts';
 
-interface DashboardStat {
-  label: string;
-  value: string;
-  change: string;
-  positive: boolean;
-}
-
-/** Route loader — replace with real API call in production */
+/** Route loader — fetches dashboard stats via the service layer */
 export async function loader() {
-  const stats: DashboardStat[] = [
-    { label: 'Total Revenue', value: '$45,231', change: '+20.1%', positive: true },
-    { label: 'Active Users', value: '2,350', change: '+15.3%', positive: true },
-    { label: 'Products', value: '128', change: '+4.5%', positive: true },
-    { label: 'Pending Orders', value: '23', change: '-2.1%', positive: false },
-  ];
-  return { stats };
+  const data = await dashboardService.getStats();
+  return { stats: data.stats };
 }
 
 export function Component() {
@@ -24,7 +14,7 @@ export function Component() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+        {stats.map((stat: DashboardStat) => (
           <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-5">
             <p className="text-sm text-gray-500">{stat.label}</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>

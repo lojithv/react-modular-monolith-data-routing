@@ -1,23 +1,11 @@
 import { Link, useLoaderData } from 'react-router';
+import type { User } from '../types.ts';
+import { userService } from '../services/user.service.ts';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  status: 'Active' | 'Inactive';
-}
-
-/** Route loader — replace with real API call in production */
+/** Route loader — fetches users via the service layer */
 export async function loader() {
-  const users: User[] = [
-    { id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin', status: 'Active' },
-    { id: '2', name: 'Bob Smith', email: 'bob@example.com', role: 'Editor', status: 'Active' },
-    { id: '3', name: 'Charlie Davis', email: 'charlie@example.com', role: 'Viewer', status: 'Inactive' },
-    { id: '4', name: 'Diana Lee', email: 'diana@example.com', role: 'Editor', status: 'Active' },
-    { id: '5', name: 'Ethan Brown', email: 'ethan@example.com', role: 'Admin', status: 'Active' },
-  ];
-  return { users };
+  const result = await userService.list();
+  return { users: result.data };
 }
 
 export function Component() {
@@ -29,7 +17,7 @@ export function Component() {
         <h2 className="text-lg font-semibold text-gray-800">All Users</h2>
       </div>
       <div className="divide-y divide-gray-100">
-        {users.map((user) => (
+        {users.map((user: User) => (
           <Link
             key={user.id}
             to={`/users/${user.id}`}

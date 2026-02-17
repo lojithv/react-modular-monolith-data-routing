@@ -1,23 +1,11 @@
 import { Link, useLoaderData } from 'react-router';
+import type { Product } from '../types.ts';
+import { productService } from '../services/product.service.ts';
 
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  category: string;
-  stock: number;
-}
-
-/** Route loader — replace with real API call in production */
+/** Route loader — fetches products via the service layer */
 export async function loader() {
-  const products: Product[] = [
-    { id: '1', name: 'Wireless Headphones', price: '$79.99', category: 'Electronics', stock: 142 },
-    { id: '2', name: 'Ergonomic Keyboard', price: '$129.99', category: 'Electronics', stock: 85 },
-    { id: '3', name: 'Standing Desk', price: '$449.99', category: 'Furniture', stock: 23 },
-    { id: '4', name: 'LED Monitor 27"', price: '$349.99', category: 'Electronics', stock: 67 },
-    { id: '5', name: 'Office Chair', price: '$299.99', category: 'Furniture', stock: 31 },
-  ];
-  return { products };
+  const result = await productService.list();
+  return { products: result.data };
 }
 
 export function Component() {
@@ -42,7 +30,7 @@ export function Component() {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
-          {products.map((product) => (
+          {products.map((product: Product) => (
             <tr key={product.id} className="hover:bg-gray-50 transition">
               <td className="px-6 py-4 font-medium text-gray-800">{product.name}</td>
               <td className="px-6 py-4 text-sm text-gray-600">{product.category}</td>
