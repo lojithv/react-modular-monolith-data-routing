@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router';
-import type { UserRole } from '../auth';
+import type { UserRole } from '@shared/auth/index.ts';
 
 export interface SidebarLink {
   to: string;

@@ -1,8 +1,8 @@
 import type { AuthUser, AuthState, UserRole, PlanTier, FeatureFlag } from '../models/auth.types.ts';
 import { PLAN_HIERARCHY } from '../models/auth.types.ts';
 
-/** Sample user — swap with real auth service in production */
-const MOCK_USER: AuthUser = {
+/** Sample user — use authStore.loginAsMock() during development */
+export const MOCK_USER: AuthUser = {
   id: '1',
   name: 'Alice Johnson',
   email: 'alice@example.com',
@@ -27,11 +27,11 @@ function buildSnapshot(user: AuthUser | null): AuthState {
  * In a microfrontend setup, this module becomes a Module Federation
  * shared singleton so every remote shares the same auth state.
  */
-class AuthStore {
+export class AuthStore {
   private listeners = new Set<() => void>();
   private snapshot: AuthState;
 
-  constructor(initialUser: AuthUser | null = MOCK_USER) {
+  constructor(initialUser: AuthUser | null = null) {
     this.snapshot = buildSnapshot(initialUser);
 
     this.subscribe = this.subscribe.bind(this);
@@ -42,6 +42,8 @@ class AuthStore {
     this.hasFeature = this.hasFeature.bind(this);
     this.hasPlan = this.hasPlan.bind(this);
     this.isTrialActive = this.isTrialActive.bind(this);
+    this.reset = this.reset.bind(this);
+    this.loginAsMock = this.loginAsMock.bind(this);
   }
 
   // ─── External Store Contract ────────────────────────────
@@ -105,6 +107,19 @@ class AuthStore {
     return new Date(trialEndsAt) > new Date();
   }
 
+  // ─── Reset / Dev Helpers ─────────────────────────────────
+
+  /** Reset store state — useful for tests and dev tooling */
+  reset(user: AuthUser | null = null): void {
+    this.snapshot = buildSnapshot(user);
+    this.emit();
+  }
+
+  /** Shortcut: log in as the built-in mock admin user (dev only) */
+  loginAsMock(): void {
+    this.login(MOCK_USER);
+  }
+
   // ─── Internal ───────────────────────────────────────────
 
   private emit(): void {
@@ -112,5 +127,22 @@ class AuthStore {
   }
 }
 
-/** Singleton instance — shared across the entire app (or via Module Federation) */
-export const authStore = new AuthStore();
+/**
+ * Retrieves or creates the global AuthStore singleton.
+ *
+ * In a Module Federation (microfrontend) setup, each remote may receive its
+ * own copy of this module unless it is explicitly shared. Registering on
+ * `globalThis` acts as a fallback to guarantee a single store instance
+ * regardless of how modules are bundled or loaded.
+ */
+const AUTH_STORE_KEY = '__AUTH_STORE__';
+
+function getOrCreateAuthStore(): AuthStore {
+  const g = globalThis as Record<string, unknown>;
+  if (!g[AUTH_STORE_KEY]) {
+    g[AUTH_STORE_KEY] = new AuthStore();
+  }
+  return g[AUTH_STORE_KEY] as AuthStore;
+}
+
+export const authStore = getOrCreateAuthStore();

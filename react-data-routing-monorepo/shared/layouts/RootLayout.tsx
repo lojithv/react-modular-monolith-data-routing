@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router';
-import Sidebar, { type SidebarLink } from '../components/Sidebar';
-import { useAuth } from '../auth';
+import Sidebar, { type SidebarLink } from '@shared/components/Sidebar.tsx';
+import { useAuth } from '@shared/auth/index.ts';
 
 /**
  * Full sidebar link registry.

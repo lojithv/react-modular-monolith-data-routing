@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import type { PlanTier } from '../auth/models/auth.types.ts';
+import type { PlanTier } from '@shared/auth/index.ts';
 
 interface PaywallProps {
   requiredPlan: PlanTier;

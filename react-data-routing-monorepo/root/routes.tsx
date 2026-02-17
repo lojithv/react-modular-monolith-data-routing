@@ -1,8 +1,9 @@
 import { createBrowserRouter } from 'react-router';
-import RootLayout from '../shared/layouts/RootLayout.tsx';
-import NotFound from '../shared/components/NotFound.tsx';
-import ErrorBoundary from '../shared/components/ErrorBoundary.tsx';
+import RootLayout from '@shared/layouts/RootLayout.tsx';
+import NotFound from '@shared/components/NotFound.tsx';
+import ErrorBoundary from '@shared/components/ErrorBoundary.tsx';
 import {
+  AuthGuard,
   RoleGuard,
   FeatureGuard,
   SubscriptionGuard,
@@ -10,13 +11,13 @@ import {
   type UserRole,
   type PlanTier,
   type FeatureFlag,
-} from '../shared/auth/index.ts';
+} from '@shared/auth/index.ts';
 
-import authRoutes from '../modules/auth/routes.ts';
-import dashboardRoutes from '../modules/dashboard/routes.ts';
-import productRoutes from '../modules/products/routes.ts';
-import userRoutes from '../modules/users/routes.ts';
-import settingsRoutes from '../modules/settings/routes.ts';
+import authRoutes from '@modules/auth/routes.ts';
+import dashboardRoutes from '@modules/dashboard/routes.ts';
+import productRoutes from '@modules/products/routes.ts';
+import userRoutes from '@modules/users/routes.ts';
+import settingsRoutes from '@modules/settings/routes.ts';
 
 // ─── Guard Helpers ──────────────────────────────────────
 // Wrap module routes with pathless layout routes that enforce access rules.
@@ -52,45 +53,52 @@ const router = createBrowserRouter([
     Component: RootLayout,
     ErrorBoundary,
     children: [
-      // ─── Dashboard (all roles, free tier OK) ──────────
       {
-        ...withRoles(['admin', 'editor', 'viewer']),
-        children: [dashboardRoutes],
-      },
-
-      // ─── Products (admin + editor, requires starter+) ─
-      {
-        ...withRoles(['admin', 'editor']),
+        // AuthGuard wraps ALL authenticated routes — individual guards
+        // no longer need to check isAuthenticated themselves.
+        element: <AuthGuard />,
         children: [
+          // ─── Dashboard (all roles, free tier OK) ──────────
           {
-            ...withPlan('starter'),
-            children: [productRoutes],
+            ...withRoles(['admin', 'editor', 'viewer']),
+            children: [dashboardRoutes],
           },
+
+          // ─── Products (admin + editor, requires starter+) ─
+          {
+            ...withRoles(['admin', 'editor']),
+            children: [
+              {
+                ...withPlan('starter'),
+                children: [productRoutes],
+              },
+            ],
+          },
+
+          // ─── Users (admin only, requires pro+) ────────────
+          {
+            ...withRoles(['admin']),
+            children: [
+              {
+                ...withPlan('pro'),
+                children: [userRoutes],
+              },
+            ],
+          },
+
+          // ─── Settings (admin + editor) ────────────────────
+          { ...withRoles(['admin', 'editor']), children: [settingsRoutes] },
+
+          // ─── UI Showcase (dev only) ───────────────────────
+          { path: 'ui', lazy: () => import('@shared/ui/pages/UIShowcase.tsx') },
+
+          // ─── Home (default redirect) ──────────────────────
+          { index: true, lazy: () => import('@modules/dashboard/pages/DashboardHome.tsx') },
+
+          // ─── 404 Catch-all ────────────────────────────────
+          { path: '*', Component: NotFound },
         ],
       },
-
-      // ─── Users (admin only, requires pro+) ────────────
-      {
-        ...withRoles(['admin']),
-        children: [
-          {
-            ...withPlan('pro'),
-            children: [userRoutes],
-          },
-        ],
-      },
-
-      // ─── Settings (admin + editor) ────────────────────
-      { ...withRoles(['admin', 'editor']), children: [settingsRoutes] },
-
-      // ─── UI Showcase (dev only) ───────────────────────
-      { path: 'ui', lazy: () => import('../shared/ui/pages/UIShowcase.tsx') },
-
-      // ─── Home (default redirect) ──────────────────────
-      { index: true, lazy: () => import('../modules/dashboard/pages/DashboardHome.tsx') },
-
-      // ─── 404 Catch-all ────────────────────────────────
-      { path: '*', Component: NotFound },
     ],
   },
 ]);

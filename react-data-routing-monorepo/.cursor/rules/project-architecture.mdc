@@ -1,0 +1,33 @@
+---
+description: Project architecture and conventions for the React modular monolith
+alwaysApply: true
+---
+
+# Project Architecture
+
+Modular monolith built with React 19, React Router v7 (data routing), Vite, and Tailwind CSS v4.
+
+## Directory Structure
+
+- `root/` - App entry point, route composition, global CSS
+- `modules/<name>/` - Feature modules (auth, dashboard, products, users, settings)
+- `shared/auth/` - Framework-agnostic auth store, React hooks, route guards
+- `shared/components/` - Reusable app-level components (ErrorBoundary, Forbidden, Paywall, etc.)
+- `shared/layouts/` - Top-level layout components (RootLayout)
+- `shared/ui/` - Primitive UI component library (Button, Input, Card, etc.)
+- `shared/types/` - Shared TypeScript types (ModuleManifest, etc.)
+
+## Module Conventions
+
+Each module must have:
+- `routes.ts` - RouteObject defining the module's route subtree
+- `layout.tsx` - Module layout component (exported as `Component`)
+- `pages/` - Page components (lazy-loaded)
+- `index.ts` - Barrel export with a `ModuleManifest` object
+
+## Import Rules
+
+- Use path aliases for cross-directory imports: `@root/`, `@modules/`, `@shared/`
+- Always include `.ts`/`.tsx` extensions on all local imports
+- Within a module's internal files, use relative paths (e.g., `../hooks/useAuth.ts`)
+- Never import from another module's internal files — only from its `index.ts`

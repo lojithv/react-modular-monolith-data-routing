@@ -1,7 +1,7 @@
-import { Navigate, Outlet, useLocation } from 'react-router';
+import { Outlet } from 'react-router';
 import { useAuth } from '../hooks/useAuth.ts';
 import type { FeatureFlag } from '../models/auth.types.ts';
-import FeatureUnavailable from '../../components/FeatureUnavailable.tsx';
+import FeatureUnavailable from '@shared/components/FeatureUnavailable.tsx';
 
 interface FeatureGuardProps {
   features: FeatureFlag[];
@@ -9,17 +9,12 @@ interface FeatureGuardProps {
 
 /**
  * Route guard that checks for required feature flags.
- * - Not authenticated → redirect to /auth/login
+ * Assumes AuthGuard already enforces authentication at the shell level.
  * - Missing feature flag → render FeatureUnavailable page
  * - All flags present → render child routes
  */
 export default function FeatureGuard({ features }: FeatureGuardProps) {
-  const { isAuthenticated, hasFeature } = useAuth();
-  const location = useLocation();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/auth/login" state={{ from: location.pathname }} replace />;
-  }
+  const { hasFeature } = useAuth();
 
   if (!hasFeature(features)) {
     return <FeatureUnavailable features={features} />;

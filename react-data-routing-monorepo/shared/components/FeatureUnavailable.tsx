@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import type { FeatureFlag } from '../auth/models/auth.types.ts';
+import type { FeatureFlag } from '@shared/auth/index.ts';
 
 interface FeatureUnavailableProps {
   features: FeatureFlag[];

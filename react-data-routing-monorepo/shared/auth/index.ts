@@ -3,7 +3,7 @@ export type { UserRole, AuthUser, AuthState, PlanTier, FeatureFlag, Subscription
 export { PLAN_HIERARCHY } from './models/auth.types.ts';
 
 // Store (framework-agnostic singleton)
-export { authStore } from './services/auth.service.ts';
+export { AuthStore, authStore, MOCK_USER } from './services/auth.service.ts';
 
 // Hooks (React adapter)
 export { useAuth } from './hooks/useAuth.ts';
